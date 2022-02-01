@@ -1,0 +1,30 @@
+{
+	"files.associations": {
+		"socket.h": "c",
+		"unistd.h": "c",
+		"ftp.h": "c",
+		"netdb.h": "c",
+		"string.h": "c",
+		"sda.h": "c",
+		"stdio.h": "c",
+		"stdlib.h": "c",
+		"network.h": "c",
+		"db.h": "c",
+		"stdbool.h": "c",
+		"main.h": "c",
+		"system_error": "c",
+		"semaphore.h": "c",
+		"*.tcc": "c",
+		"fstream": "c",
+		"ostream": "c",
+		"sstream": "c",
+		"streambuf": "c",
+		"protocole.h": "c",
+		"server.h": "c",
+		"inet.h": "c",
+		"client.h": "c",
+		"cmath": "c",
+		"types.h": "c",
+		"in.h": "c"
+	}
+}

@@ -1,0 +1,60 @@
+{
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "server",
+            "command": "/usr/bin/gcc",
+            "args": [
+                "-g",
+                "db.c",
+                "protocole.c",
+                "network.c",
+                "server.c",
+                "-lsda",
+                "-lpthread",
+                "-o",
+                // "--pedantic",
+                // "--std=c90",
+                "server"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+        },
+        {
+            "type": "cppbuild",
+            "label": "client",
+            "command": "/usr/bin/gcc",
+            "args": [
+                "-g",
+                "shell.c",
+                "protocole.c",
+                "network.c",
+                "client.c",
+                "-lsda",
+                "-o",
+                // "--pedantic",
+                // "--std=c90",
+                "client"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+        }
+    ],
+    "version": "2.0.0"
+}
