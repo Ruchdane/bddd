@@ -143,15 +143,17 @@ int main(int argc, char const* argv[]) {
 	printf("Fin de la configuration\n");
 
 	if (argc > 3) {
-		printf("Connection au peer tcp:%s::%S ....\n", argv[3], argv[2]);
+		printf("Connection au peer %s::%S ....\n", argv[3], argv[2]);
 		struct client* client;
 		size_t len;
+		socklen_t addrlen;
 
 		client = malloc(sizeof(*client));
+		addrlen = sizeof(client->addr);
 		client->socket = 0;
 		client->isPeer = true;
 		client->writesock = connectTo(argv[2], argv[3]);
-
+		client->readsock = 0;
 		write(client->writesock, &client->isPeer, sizeof(bool));
 
 		len = strlen(server.port);
@@ -161,13 +163,17 @@ int main(int argc, char const* argv[]) {
 		len = strlen(server.address);
 		write(client->writesock, &len, sizeof(len));
 		write(client->writesock, server.address, len);
-		if (listen(server.socket, 10)) {
-			client->readsock = accept(server.socket, (struct sockaddr*)&(client->addr), NULL);
-			if (client->readsock) {
+		if (!listen(server.socket, 1)) {
+			client->readsock = accept(server.socket, (struct sockaddr*)&(client->addr), &addrlen);
+			if (client->readsock == -1) {
 				log("erreur lors reception de la connexion")
 			}
+			pthread_create(&(client->thread), NULL, PeerThread, (void*)client);
+			server.peers = append(server.peers, client);
+			printf("\nFin de la configuration\n");
 		}
-		server.peers = append(server.peers, client);
+		else
+			log("erreur lors de la connection inverse vers");
 		printf("\nFin de la configuration\n");
 	}
 
