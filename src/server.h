@@ -13,7 +13,7 @@
 #include "network.h"
 // #include "replication.h"
 #include "protocole.h"
-#define log(message) fprintf(stderr, "%d: %s %s\n", errno, strerror(errno), message);
+#include "log.h"
 struct server
 {
 	int socket;
@@ -25,6 +25,7 @@ struct server
 struct client
 {
 	int socket;
+	bool isConnected;
 	int readsock;
 	int writesock;
 	struct sockaddr_storage addr;
