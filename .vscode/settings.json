@@ -25,6 +25,7 @@
 		"client.h": "c",
 		"cmath": "c",
 		"types.h": "c",
-		"in.h": "c"
+		"in.h": "c",
+		"log.h": "c"
 	}
 }

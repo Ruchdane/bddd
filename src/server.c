@@ -46,7 +46,8 @@ void* broadcastPutThread(void* data) {
 	struct client* peer;
 	foreach(element, server.peers) {
 		peer = (struct client*)element->value;
-		_put(peer->writesock, json->key, strlen(json->key), json->value, strlen(json->value));
+		if(peer->isConnected)
+			_put(peer->writesock, json->key, strlen(json->key), json->value, strlen(json->value));
 
 	}
 	pthread_exit(NULL);
@@ -58,7 +59,8 @@ void* broadcastDeleteThread(void* data) {
 	struct client* peer;
 	foreach(element, server.peers) {
 		peer = (struct client*)element->value;
-		_delete(peer->writesock, key, strlen(key));
+		if(peer->isConnected)
+			_delete(peer->writesock, key, strlen(key));
 	}
 	pthread_exit(NULL);
 }
@@ -69,17 +71,27 @@ void* ClientThread(void* param) {
 	char* key;
 	struct json* json;
 	pthread_t replication_thread;
-
-	printf("Client conected\n");
+	printTime();
+	printf(" Client conected\n");
 
 	while (exit) {
 		exit = read(client->socket, &option, sizeof(option));
+		if(exit == 0){
+			printTime();
+			printf(" Client disconected\n");
+			client->isConnected = false;
+			break;printTime();
+		}
 		switch (option) {
 			case 0: //GET
+				printTime();
+				printf(" Client > ");
 				exit = __get(client->socket, get);
 				break;
 
 			case 1: //DELETE
+				printTime();
+				printf(" Client > ");
 				key = __delete(client->socket, delete);
 				if (key)
 					pthread_create(&replication_thread, NULL, broadcastDeleteThread, (void*)key);
@@ -88,6 +100,8 @@ void* ClientThread(void* param) {
 				break;
 
 			case 2: //PUT
+				printTime();
+				printf(" Client > ");
 				json = __put(client->socket, put);
 				if (json)
 					pthread_create(&replication_thread, NULL, broadcastPutThread, (void*)json);
@@ -105,19 +119,32 @@ void* ClientThread(void* param) {
 void* PeerThread(void* param) {
 	struct client* peer = (struct client*)param;
 	int option, exit = 1;
-	printf("Peer conected\n");
+	printTime();
+	printf(" Peer conected\n");
 	while (exit) {
 		exit = read(peer->readsock, &option, sizeof(option));
+		if(exit == 0){
+			peer->isConnected = false;
+			printTime();
+			printf(" Peer disconected\n");
+			break;
+		}
 		switch (option) {
 			case 0: //GET
+				printTime();
+				printf(" Peer > ");
 				exit = __get(peer->readsock, get);
 				break;
 
 			case 1: //DELETE
+				printTime();
+				printf(" Peer > ");
 				exit = __delete(peer->readsock, delete) ? 1 : 0;
 				break;
 
 			case 2: //PUT
+				printTime();
+				printf(" Peer > ");
 				exit = __put(peer->readsock, put) ? 1 : 0;
 				break;
 
@@ -152,6 +179,7 @@ int main(int argc, char const* argv[]) {
 		addrlen = sizeof(client->addr);
 		client->socket = 0;
 		client->isPeer = true;
+		client->isConnected = true;
 		client->writesock = connectTo(argv[2], argv[3]);
 		client->readsock = 0;
 		write(client->writesock, &client->isPeer, sizeof(bool));
@@ -174,7 +202,6 @@ int main(int argc, char const* argv[]) {
 		}
 		else
 			log("erreur lors de la connection inverse vers");
-		printf("\nFin de la configuration\n");
 	}
 
 	while (true) {
@@ -182,7 +209,6 @@ int main(int argc, char const* argv[]) {
 			log("Erreur lors de la receptions des connection au socket\n");
 		}
 
-		printf("Ecoute...\n");
 		struct client* client;
 		socklen_t client_len;
 		char address_buffer[100];
@@ -197,6 +223,7 @@ int main(int argc, char const* argv[]) {
 
 		if (!client->isPeer) {
 			client->socket = client_socket;
+			client->isConnected = true;
 			server.clients = append(server.clients, client);
 			pthread_create(&(client->thread), NULL, ClientThread, (void*)client);
 		}
@@ -217,7 +244,7 @@ int main(int argc, char const* argv[]) {
 
 			client->writesock = connectTo(peerPort, peerAddress);
 			server.peers = append(server.peers, client);
-
+			client->isConnected = true;
 			pthread_create(&(client->thread), NULL, PeerThread, (void*)client);
 
 			// free(peerAddress);

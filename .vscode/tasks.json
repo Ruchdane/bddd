@@ -10,6 +10,7 @@
                 "protocole.c",
                 "network.c",
                 "server.c",
+                "log.c",
                 "-lsda",
                 "-lpthread",
                 "-o",

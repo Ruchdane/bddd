@@ -52,7 +52,7 @@ ssize_t __get(int sock, char* (*get)(char *))
 	key = malloc(len + 1);
 	result = read(sock, key, len);
 	key[len] = '\0';
-	printf("\tExecution de get '%s'\n", key);
+	printf("Execution de get '%s'\n", key);
 	key[len] = '\0';
 	value = get(key);
 	len = value ? strlen(value) : -1;
@@ -71,7 +71,7 @@ char * __delete(int sock, int(*delete)(char *))
 	key = malloc(len + 1);
 	result = read(sock, key, len);
 	key[len] = '\0';
-	printf("\tExecution de delete '%s'\n", key);
+	printf("Execution de delete '%s'\n", key);
 	result = delete(key);
 	result = write(sock, &result, sizeof(result));
 	return key;
@@ -90,7 +90,7 @@ struct json * __put(int sock, struct json*(*put)(char *,char *))
 	value = malloc(len + 1);
 	result = read(sock, value, len);
 	value[len] = '\0';
-	printf("\tExecution de put '%s' '%s' \n", key, value);
+	printf("Execution de put '%s' '%s' \n", key, value);
 	element = put(key, value);
 	result = (element == NULL);
 	result = write(sock, &result, sizeof(result));
