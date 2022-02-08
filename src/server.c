@@ -1,6 +1,6 @@
 #include "server.h"
 
-struct server server = { -1, "3000","localhost", NULL, NULL };
+struct server server = { -1, "3000","localhost", NULL, NULL,true, CP };
 
 static void end(int sig) {
 	struct client* client, * peer;
@@ -46,7 +46,7 @@ void* broadcastPutThread(void* data) {
 	struct client* peer;
 	foreach(element, server.peers) {
 		peer = (struct client*)element->value;
-		if(peer->isConnected)
+		if (peer->isConnected)
 			_put(peer->writesock, json->key, strlen(json->key), json->value, strlen(json->value));
 
 	}
@@ -59,7 +59,7 @@ void* broadcastDeleteThread(void* data) {
 	struct client* peer;
 	foreach(element, server.peers) {
 		peer = (struct client*)element->value;
-		if(peer->isConnected)
+		if (peer->isConnected)
 			_delete(peer->writesock, key, strlen(key));
 	}
 	pthread_exit(NULL);
@@ -76,7 +76,7 @@ void* ClientThread(void* param) {
 
 	while (exit) {
 		exit = read(client->socket, &option, sizeof(option));
-		if(exit == 0){
+		if (exit == 0) {
 			printTime();
 			printf(" Client disconected\n");
 			client->isConnected = false;
@@ -90,6 +90,14 @@ void* ClientThread(void* param) {
 				break;
 
 			case 1: //DELETE
+				if (!isWriteAllowed(server)) {
+					_writeRequestRefused(client->socket);
+					printTime();
+					printf(" Client write request refused \n");
+					break;
+				}
+				else
+					_writeRequestAccepeted(client->socket);
 				printTime();
 				printf(" Client > ");
 				key = __delete(client->socket, delete);
@@ -100,6 +108,14 @@ void* ClientThread(void* param) {
 				break;
 
 			case 2: //PUT
+				if (!isWriteAllowed(server)) {
+					_writeRequestRefused(client->socket);
+					printTime();
+					printf(" Client write request refused \n");
+					break;
+				}
+				else
+					_writeRequestAccepeted(client->socket);
 				printTime();
 				printf(" Client > ");
 				json = __put(client->socket, put);
@@ -123,10 +139,11 @@ void* PeerThread(void* param) {
 	printf(" Peer conected\n");
 	while (exit) {
 		exit = read(peer->readsock, &option, sizeof(option));
-		if(exit == 0){
+		if (exit == 0) {
 			peer->isConnected = false;
 			printTime();
 			printf(" Peer disconected\n");
+			if (server.allPeerOnline) server.allPeerOnline = false;
 			break;
 		}
 		switch (option) {
@@ -137,12 +154,14 @@ void* PeerThread(void* param) {
 				break;
 
 			case 1: //DELETE
+				_writeRequestAccepeted(peer->socket);
 				printTime();
 				printf(" Peer > ");
 				exit = __delete(peer->readsock, delete) ? 1 : 0;
 				break;
 
 			case 2: //PUT
+				_writeRequestAccepeted(peer->socket);
 				printTime();
 				printf(" Peer > ");
 				exit = __put(peer->readsock, put) ? 1 : 0;

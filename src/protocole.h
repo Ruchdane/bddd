@@ -17,18 +17,21 @@
 #include <netdb.h>
 #include <stdbool.h>
 
-int _put(int sock,char *key ,size_t keyLen, char *value, size_t valueLen);
+int _put(int sock, char* key, size_t keyLen, char* value, size_t valueLen);
 
-char *_get(int sock,char *key ,size_t keyLen);
+char* _get(int sock, char* key, size_t keyLen);
 
-int _delete(int sock,char *key ,size_t keyLen);
+int _delete(int sock, char* key, size_t keyLen);
 
-ssize_t __get(int sock, char *(*get)(char *));
+ssize_t __get(int sock, char* (*get)(char*));
 
-char * __delete(int sock, int (*delete)(char *));
+char* __delete(int sock, int (*delete)(char*));
 
-struct json * __put(int sock, struct json * (*put)(char *,char *));
+struct json* __put(int sock, struct json* (*put)(char*, char*));
 
 #define networkWrite(sock,ptr,len) if(write(sock,ptr,len) != len) printf("Number of bytes writen doesn't corespond")
 #define networkRead(sock,ptr,len) if(read(sock,ptr,len) != len) printf("Number of bytes read doesn't corespond")
+
+void _writeRequestRefused(int sock);
+void _writeRequestAccepeted(int sock);
 #endif // NETWORKCLINETSIDE

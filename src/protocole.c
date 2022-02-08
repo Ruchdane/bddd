@@ -4,9 +4,9 @@
 // 	sock = _socket;
 // }
 //CLient
-char *_get(int sock,char *key, size_t len)
+char* _get(int sock, char* key, size_t len)
 {
-	char *result;
+	char* result;
 	int option = 0;
 	networkWrite(sock, &option, sizeof(option));
 	networkWrite(sock, &len, sizeof(len));
@@ -20,34 +20,56 @@ char *_get(int sock,char *key, size_t len)
 	return result;
 }
 
-int _delete(int sock,char *key, size_t len)
+int _delete(int sock, char* key, size_t len)
 {
 	int option = 1;
 	ssize_t result = 0;
+	read(sock, &result, sizeof(result));
+	if (result) {
+		if (result == -1)
+			printf("Write request refused\n");
+		return 0;
+	}
 	networkWrite(sock, &option, sizeof(option));
 	networkWrite(sock, &len, sizeof(len));
 	networkWrite(sock, key, len);
 	networkRead(sock, &result, sizeof(result));
 	return result != 0;
 }
-int _put(int sock,char *key, size_t keyLen, char *value, size_t valueLen)
+int _put(int sock, char* key, size_t keyLen, char* value, size_t valueLen)
 {
 	int option = 2;
 	ssize_t result = 0;
 	networkWrite(sock, &option, sizeof(option));
+	read(sock, &result, sizeof(result));
+	if (result) {
+		if (result == -1)
+			printf("Write request refused\n");
+		return 0;
+	}
 	networkWrite(sock, &keyLen, sizeof(keyLen));
 	networkWrite(sock, key, keyLen);
 	networkWrite(sock, &valueLen, sizeof(valueLen));
 	networkWrite(sock, value, valueLen);
 	networkRead(sock, &result, sizeof(result));
-	return result  != 0;
+	return result != 0;
+}
+
+void _writeRequestRefused(int sock) {
+	ssize_t result = -1;
+	write(sock, &result, sizeof(result));
+}
+
+void _writeRequestAccepeted(int sock) {
+	ssize_t result = 0;
+	write(sock, &result, sizeof(result));
 }
 
 //Master get 
-ssize_t __get(int sock, char* (*get)(char *))
+ssize_t __get(int sock, char* (*get)(char*))
 {
 	ssize_t len, result;
-	char *key, *value;
+	char* key, * value;
 	result = read(sock, &len, sizeof(len));
 	key = malloc(len + 1);
 	result = read(sock, key, len);
@@ -63,10 +85,10 @@ ssize_t __get(int sock, char* (*get)(char *))
 	return result;
 }
 
-char * __delete(int sock, int(*delete)(char *))
+char* __delete(int sock, int(*delete)(char*))
 {
-	ssize_t len,result;
-	char *key;
+	ssize_t len, result;
+	char* key;
 	result = read(sock, &len, sizeof(len));
 	key = malloc(len + 1);
 	result = read(sock, key, len);
@@ -77,11 +99,11 @@ char * __delete(int sock, int(*delete)(char *))
 	return key;
 }
 
-struct json * __put(int sock, struct json*(*put)(char *,char *))
+struct json* __put(int sock, struct json* (*put)(char*, char*))
 {
 	struct json* element;
 	ssize_t len, result;
-	char *key, *value;
+	char* key, * value;
 	result = read(sock, &len, sizeof(len));
 	key = malloc(len + 1);
 	result = read(sock, key, len);

@@ -14,6 +14,10 @@
 // #include "replication.h"
 #include "protocole.h"
 #include "log.h"
+
+enum mode {
+	AP,CP,AC
+};
 struct server
 {
 	int socket;
@@ -21,7 +25,10 @@ struct server
 	const char *address;
 	struct element* clients;
 	struct element* peers;
+	bool allPeerOnline;
+	enum mode mode;
 };
+#define isWriteAllowed(server) (server.allPeerOnline || server.mode == AP)
 struct client
 {
 	int socket;
