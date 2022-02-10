@@ -1,2 +1,5 @@
 src/client
 src/server
+dist/client
+dist/server
+bin/*.o
