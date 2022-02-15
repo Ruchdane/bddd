@@ -24,13 +24,13 @@ int _delete(int sock, char* key, size_t len)
 {
 	int option = 1;
 	ssize_t result = 0;
+	networkWrite(sock, &option, sizeof(option));
 	read(sock, &result, sizeof(result));
 	if (result) {
 		if (result == -1)
 			printf("Write request refused\n");
 		return 0;
 	}
-	networkWrite(sock, &option, sizeof(option));
 	networkWrite(sock, &len, sizeof(len));
 	networkWrite(sock, key, len);
 	networkRead(sock, &result, sizeof(result));

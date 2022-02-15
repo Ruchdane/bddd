@@ -8,7 +8,7 @@
 			"name": "debug server 3000",
 			"type": "cppdbg",
 			"request": "launch",
-			"program": "${fileDirname}/server",
+			"program": "${workspaceFolder}/dist/server",
 			"args": [
 				// "3001",
 				"3000",
@@ -33,7 +33,7 @@
 			"name": "debug server 3001",
 			"type": "cppdbg",
 			"request": "launch",
-			"program": "${fileDirname}/server",
+			"program": "${workspaceFolder}/dist/server",
 			"args": [
 				"3001",
 				"3000",
@@ -58,7 +58,7 @@
 			"name": "debug client",
 			"type": "cppdbg",
 			"request": "launch",
-			"program": "${fileDirname}/client",
+			"program": "${workspaceFolder}/dist/client",
 			"args": [
 				"3000",
 				"localhost"

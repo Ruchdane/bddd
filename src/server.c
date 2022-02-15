@@ -154,14 +154,14 @@ void* PeerThread(void* param) {
 				break;
 
 			case 1: //DELETE
-				_writeRequestAccepeted(peer->socket);
+				_writeRequestAccepeted(peer->readsock);
 				printTime();
 				printf(" Peer > ");
 				exit = __delete(peer->readsock, delete) ? 1 : 0;
 				break;
 
 			case 2: //PUT
-				_writeRequestAccepeted(peer->socket);
+				_writeRequestAccepeted(peer->readsock);
 				printTime();
 				printf(" Peer > ");
 				exit = __put(peer->readsock, put) ? 1 : 0;
